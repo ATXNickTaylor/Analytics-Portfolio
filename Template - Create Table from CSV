@@ -1,0 +1,76 @@
+-- Template Code Written By: Nick Taylor
+-- Template Purpose: Create a Table from a CSV file
+
+-- Real-World Scenario, Ad-Hoc Analytics Request
+-- NOTE: Names of Tables and Columns have been replaced to avoid any issue with previous companies I've worked with
+
+-- Step 1: Create the Table
+
+CREATE TABLE TableName (
+    Category VARCHAR(255), -- Variable-length character string
+    SalesAmount DECIMAL(3,2), -- Decimal for amount with 3 digits before the decimal and 2 digits after
+    Date DATE, -- Date value in YYYY-MM-DD format
+    ProductName VARCHAR(255) -- Variable-length character string
+    -- More columns can be added if need be by adding a comma ',' after ProductName and continuing on
+);
+
+-- IMPORTANT:
+-- Adjust the column names and data types according to the structure of the CSV file
+-- Make sure the order and data types of columns match those in the CSV file
+
+-- Step 2: Import Data from CSV
+
+-- IMPORTANT:
+-- Replace '/Users/Nick.Taylor/Documents/samplefile.csv' with the actual path to the CSV file
+-- Replace 'CSV_FILE_OPTIONS' with options specific to your CSV format (like delimiter, quote character, etc.)
+
+COPY TableName
+FROM '/Users/Nick.Taylor/Documents/samplefile.csv'
+WITH (
+  FORMAT csv, -- Specifies the format of the file. In this case, it's a CSV file.
+  DELIMITER ',', -- Defines the character that separates columns in the CSV. Here, it's a comma.
+  HEADER, -- Indicates that the first row of the CSV file contains column headers.
+  QUOTE '"', -- Specifies the character used for quoting fields in the CSV. Here, it's a double quote.
+  NULL 'NULL', -- Defines how NULL values are represented in the CSV. In this case, the string 'NULL' represents a NULL value.
+  ENCODING 'UTF8' -- Sets the character encoding of the file. Here, it's specified as UTF-8.
+);
+
+-- Notes:
+-- The 'COPY' command is used here as an example. The exact command can vary depending on the type of SQL being used (SQL, MySQL, PostgreSQL, etc). See below for differing examples.
+-- CSV_FILE_OPTIONS might include other syntax like ESCAPE, FORCE_NOT_NULL, and ERROR_HANDLING.
+-- Ensure that the CSV file's path is accessible by the SQL server. In some environments, you might need to place the CSV file in a specific directory or use an absolute path.
+
+-- Example for PostgreSQL:
+-- WITH (FORMAT csv, HEADER true, DELIMITER ',');
+
+-- Example for MySQL (using LOAD DATA INFILE, run this as a separate command, not in SQL):
+-- LOAD DATA INFILE 'path/to/your/csvfile.csv' INTO TABLE YourTableName
+-- FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n'
+-- IGNORE 1 LINES;
+
+-- Step 3: Table created, now we run the ad-hoc analysis
+
+SELECT
+    Category,
+    Date,
+    SalesAmount,
+    ProductName,
+
+    -- Window Function: Calculate running total within each category
+    SUM(SalesAmount) OVER (PARTITION BY Category ORDER BY Date) AS RunningTotal,
+      -- The SUM() OVER() function calculates the running total of SalesAmount for each Category, ordered by Date.
+
+    -- Window Function 2: Calculate the rank of sales amounts within each category
+    RANK() OVER (PARTITION BY Category ORDER BY SalesAmount DESC) AS SalesRank,
+      -- The RANK() OVER() function assigns a rank to each sales amount within each category, with the highest sales getting rank 1.
+
+    -- String Aggregate Function: Concatenate product names into a single string per date
+    STRING_AGG(ProductName, ', ') WITHIN GROUP (ORDER BY ProductName) OVER (PARTITION BY Date) AS ProductsList
+      -- The STRING_AGG() function concatenates ProductNames into a single string for each Date, separated by commas.
+
+FROM
+    TableName;
+
+-- End of Template code for Data Analytics Portfolio
+-- Contact The Author:
+  -- Email: NickTaylorATX@gmail.com
