@@ -1,6 +1,8 @@
 -- Template Code Written By: Nick Taylor
 -- Template Purpose: Create a Table from a CSV file
 
+-- Environment: PostgreSQL
+
 -- Real-World Scenario, Ad-Hoc Analytics Request
 -- NOTE: Names of Tables and Columns have been replaced to avoid any issue with previous companies I've worked with
 
@@ -8,8 +10,9 @@
 
 CREATE TABLE TableName (
     Category VARCHAR(255), -- Variable-length character string
-    SalesAmount DECIMAL(3,2), -- Decimal for amount with 3 digits before the decimal and 2 digits after
+    SalesAmount DECIMAL(5,2), -- Decimal for amount with 3 digits before the decimal and 2 digits after
     Date DATE, -- Date value in YYYY-MM-DD format
+        -- This assumes the date format in the CSV file is in the YYYY-MM-DD format as well
     ProductName VARCHAR(255) -- Variable-length character string
     -- More columns can be added if need be by adding a comma ',' after ProductName and continuing on
 );
@@ -25,7 +28,8 @@ CREATE TABLE TableName (
 -- Replace 'CSV_FILE_OPTIONS' with options specific to your CSV format (like delimiter, quote character, etc.)
 
 COPY TableName
-FROM '/Users/Nick.Taylor/Documents/samplefile.csv'
+FROM '/Users/Nick.Taylor/Documents/samplefile.csv' -- PostgreSQL requires that the file path be accessible on the server where PostgreSQL is running, not on the client machine.
+    -- The database server (like PostgreSQL) needs to have read permissions on the CSV file.
 WITH (
   FORMAT csv, -- Specifies the format of the file. In this case, it's a CSV file.
   DELIMITER ',', -- Defines the character that separates columns in the CSV. Here, it's a comma.
@@ -36,15 +40,13 @@ WITH (
 );
 
 -- Notes:
--- The 'COPY' command is used here as an example. The exact command can vary depending on the type of SQL being used (SQL, MySQL, PostgreSQL, etc). See below for differing examples.
+-- The 'COPY' command is used here as an example within PostgreSQL. The exact command can vary depending on the type of SQL being used (SQL, MySQL, etc). See below for differing examples.
 -- CSV_FILE_OPTIONS might include other syntax like ESCAPE, FORCE_NOT_NULL, and ERROR_HANDLING.
 -- Ensure that the CSV file's path is accessible by the SQL server. In some environments, you might need to place the CSV file in a specific directory or use an absolute path.
 
--- Example for PostgreSQL:
--- WITH (FORMAT csv, HEADER true, DELIMITER ',');
-
 -- Example for MySQL (using LOAD DATA INFILE, run this as a separate command, not in SQL):
 -- LOAD DATA INFILE 'path/to/your/csvfile.csv' INTO TABLE YourTableName
+    -- User needs to have the FILE privilege to use this command
 -- FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n'
 -- IGNORE 1 LINES;
 
@@ -67,6 +69,7 @@ SELECT
     -- String Aggregate Function: Concatenate product names into a single string per date
     STRING_AGG(ProductName, ', ') WITHIN GROUP (ORDER BY ProductName) OVER (PARTITION BY Date) AS ProductsList
       -- The STRING_AGG() function concatenates ProductNames into a single string for each Date, separated by commas.
+      -- The STRING_AGG() function is specific to PostgreSQL. Its availability and syntax in other databases (like MySQL's GROUP_CONCAT) might differ.
 
 FROM
     TableName;
