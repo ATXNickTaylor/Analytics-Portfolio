@@ -1,0 +1,85 @@
+-- SQL Query for Analyzing Sales Data in Snowflake
+
+-- Template Code Written By: Nick Taylor
+
+-- Environment: Snowflake, standard SQL
+
+-- Real-World Scenario, Ad-Hoc Analytics Request
+
+-- Purpose: To gain insights into sales performance for the previous quarter, by category, to determine which Reps receive added bonuses.
+
+-- Optimization notes for Snowflake:
+  -- Snowflake handles query optimization internally, including the efficient use of resources.
+
+WITH AggregatedData AS (
+    SELECT
+        SaleDate,
+        Category,
+        SUM(Amount) AS TotalSalesAmount,
+        AVG(Amount) AS AverageSaleAmount,
+        SUM(Quantity) AS TotalItemsSold
+    FROM
+        SalesData
+    WHERE 
+        SaleDate BETWEEN '2022-01-01' AND '2022-03-31'
+    GROUP BY
+        Category, SaleDate
+)
+SELECT
+    *,
+
+    -- Window Function: Calculate running total of sales amount by category
+
+    SUM(TotalSalesAmount) OVER (PARTITION BY Category ORDER BY SaleDate) AS RunningTotalByCategory,
+      -- The SUM() OVER() function here calculates the cumulative sales amount for each category, ordered by date.
+      -- PARTITION BY Category divides the entire dataset into smaller subsets or partitions based on unique values in the Category column. Each partition contains rows with the same Category value.
+      -- Once the data is partitioned, the window function (like SUM(), AVG(), RANK(), etc.) is applied independently to each partition. This means the calculation is reset for each category. For example, a running total or ranking is calculated within each category, rather than across the entire dataset.
+
+    -- Window Function: Calculate the moving average of sales amount over the past 7 days
+
+    AVG(TotalSalesAmount) OVER (ORDER BY SaleDate ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS MovingAvgSalesAmount,
+      -- This calculates the 7-day moving average of sales, providing insight into short-term trends.
+
+    -- Ranking sales by date within each category
+    RANK() OVER (PARTITION BY Category ORDER BY TotalSalesAmount DESC) AS SalesRankInCategory
+      -- Assigns a rank to each sale within its category, based on the sale amount.
+
+FROM
+    AggregatedData
+ORDER BY
+    Category, SaleDate
+;
+-- End
+
+-- Structure Notes:
+  -- The AggregatedData CTE first performs the aggregation, and then the main query applies the window functions on the aggregated data.
+  -- This approach avoids mixing direct aggregations and window functions in the same level of query.
+  -- This approach is also preferred when handling large subsets of data.
+  -- The query provides a comprehensive view of sales performance, including total and average sales, items sold, and trends.
+  -- Running totals and moving averages offer insights into the sales dynamics over time.
+  -- The RANK() function helps identify top-performing sales within each category.
+
+-- Another way this query can be written is below. However, you'd encounter issues due to the combination of window and aggregate functions. This code was written by a Junior Analyst, and I worked with them to restructure it to the above code.
+
+-- SELECT
+--    SaleDate,
+--    Category,
+--    SUM(Amount) AS TotalSalesAmount,
+--    AVG(Amount) AS AverageSaleAmount,
+--    SUM(Quantity) AS TotalItemsSold,
+
+--    SUM(Amount) OVER (PARTITION BY Category ORDER BY SaleDate) AS RunningTotalByCategory,
+--    AVG(Amount) OVER (ORDER BY SaleDate ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS MovingAvgSalesAmount,
+--    RANK() OVER (PARTITION BY Category ORDER BY Amount DESC) AS SalesRankInCategory
+-- FROM
+--    SalesData
+
+-- WHERE SaleDate BETWEEN '2022-01-01' AND '2022-03-31'
+
+-- GROUP BY
+--    Category, SaleDate
+-- ORDER BY
+--    Category, SaleDate
+-- ;
+
+-- End of SQL Analysis Query
