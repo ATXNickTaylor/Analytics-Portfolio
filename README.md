@@ -1,6 +1,6 @@
 # Analytics-Portfolio
 
-<br><h1>IN PROGRESS (Additional code files will be added over the holiday week.) A.O. 2023-12-22 2:15 PM CST</h1><br>
+<br><h1>Living Repository - Updated as of 2023-12-29</h1><br>
 
 <h3>Overview</h3>
 Welcome to my professional Data Analytics Portfolio on GitHub! This repository represents a curated collection of projects and code samples from my 18-year career in data analytics. It's designed to showcase my skills, experience, and approach to solving real-world data challenges. Any columns, tables, views, or related are all madeup to avoid any conflict or reference to real data.
