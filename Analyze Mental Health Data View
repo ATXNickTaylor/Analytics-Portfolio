@@ -2,7 +2,7 @@
 
 -- Purpose: Analyze therapist performance, client demographics, and insurance claim patterns, focusing on meaningful relationships between these entities.
 
--- Environment: Assumes the existence of a view named 'MentalHealthCareData' created from previous code file.
+-- Environment: Assumes the existence of a view named 'MentalHealthCareData' created from previous code file: ViewCreationWithErrorHandling
 
 -- Utilizing CTEs (Common Table Expressions) for structured, modular analysis
 
