@@ -1,0 +1,71 @@
+-- Advanced SQL Query for Data Analysis from the MentalHealthCareData View
+
+-- Purpose: Analyze therapist performance, client demographics, and insurance claim patterns, focusing on meaningful relationships between these entities.
+
+-- Environment: Assumes the existence of a view named 'MentalHealthCareData' created from previous code file.
+
+-- Utilizing CTEs (Common Table Expressions) for structured, modular analysis
+
+-- BEGIN Query
+
+WITH
+TherapistPerformance AS (
+    -- Analyzing therapist performance based on the number of clients and revenue
+    SELECT
+        TherapistID,
+        COUNT(DISTINCT ClientID) AS TotalClients,
+        SUM(TotalSalesAmount) AS TotalRevenue,
+        AVG(TotalSalesAmount) AS AvgRevenuePerClient
+    FROM
+        MentalHealthCareData
+    GROUP BY
+        TherapistID
+),
+ClientDemographics AS (
+    SELECT
+        ClientID,
+        TherapistID,  -- Adding this column
+        AVG(Age) AS AvgClientAge
+    FROM
+        MentalHealthCareData
+    GROUP BY
+        ClientID, TherapistID  -- Grouping by TherapistID as well
+),
+InsuranceClaimAnalysis AS (
+    -- Focusing on insurance claims, particularly approved claims
+    SELECT
+        ClientID,
+        COUNT(*) AS TotalClaims,
+        SUM(ClaimAmount) AS TotalClaimAmount
+    FROM
+        MentalHealthCareData
+    WHERE
+        ClaimStatus = 'Approved'
+    GROUP BY
+        ClientID
+)
+
+-- Main Query: Combining insights from the CTEs
+SELECT
+    -- Selecting key metrics from each CTE for a comprehensive analysis
+    tp.TherapistID,
+    tp.TotalClients,
+    tp.TotalRevenue,
+    tp.AvgRevenuePerClient,
+    cd.AvgClientAge,
+    ica.TotalClaims,
+    ica.TotalClaimAmount
+FROM
+    TherapistPerformance tp
+    -- Joining the TherapistPerformance CTE with ClientDemographics to link therapists to clients
+    INNER JOIN ClientDemographics cd ON tp.TherapistID = cd.TherapistID
+    -- Joining the above result with InsuranceClaimAnalysis to add insurance claim data
+    INNER JOIN InsuranceClaimAnalysis ica ON cd.ClientID = ica.ClientID;
+
+-- Notes:
+-- This query provides a multi-faceted analysis of the mental health care data, focusing on therapists, clients, and insurance aspects.
+-- The use of CTEs structures the query for readability and modular analysis.
+-- INNER JOINs ensure that the final dataset reflects meaningful relationships between therapists, their clients, and the clients' insurance claims.
+-- The resulting dataset can be used for in-depth analysis and decision-making, such as identifying key areas for improvement or investment.
+
+-- END QUERY
