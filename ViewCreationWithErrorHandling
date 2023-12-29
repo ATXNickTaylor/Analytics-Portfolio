@@ -1,0 +1,53 @@
+-- SQL Query to Create a Combined View for a Mental Health Care Company
+
+-- Purpose: Create a view that combines therapist details, client information, and insurance claims
+-- This view will be used in dbt for further data modeling and analysis
+
+-- Assuming the existence of three tables:
+-- 1. Therapists (TherapistID, Name, Specialization, etc.)
+-- 2. Clients (ClientID, TherapistID, Name, Age, etc.)
+-- 3. InsuranceClaims (ClaimID, ClientID, Date, Amount, Status, etc.)
+
+-- Error Handling: The TRY...CATCH block is used to handle any errors that occur during the execution of the view creation
+BEGIN TRY
+
+    -- Create or Replace View: MentalHealthCareData
+    CREATE OR ALTER VIEW MentalHealthCareData AS
+
+    -- Selecting relevant columns from each table and performing JOIN operations
+    SELECT
+        t.TherapistID,
+        t.Name AS TherapistName,
+        t.Specialization,
+        c.ClientID,
+        c.Name AS ClientName,
+        c.Age AS ClientAge,
+        ic.ClaimID,
+        ic.Date AS ClaimDate,
+        ic.Amount AS ClaimAmount,
+        ic.Status AS ClaimStatus
+
+    -- Joining Therapists table with Clients table on TherapistID
+    FROM Therapists t
+    INNER JOIN Clients c ON t.TherapistID = c.TherapistID
+
+    -- Joining the above result with InsuranceClaims table on ClientID
+    INNER JOIN InsuranceClaims ic ON c.ClientID = ic.ClientID;
+
+    PRINT 'View MentalHealthCareData created successfully.';
+
+END TRY
+BEGIN CATCH
+    -- Catching and displaying the error if any occurs during the view creation
+    SELECT 
+        ERROR_NUMBER() AS ErrorNumber,
+        ERROR_MESSAGE() AS ErrorMessage;
+END CATCH;
+
+-- Notes:
+-- - The view 'MentalHealthCareData' consolidates data across therapists, clients, and insurance claims.
+-- - INNER JOIN ensures that only matching records (therapists with clients and corresponding insurance claims) are included.
+-- - This view will facilitate in-depth analysis of therapist-client interactions and insurance claim details.
+-- - Can be used in dbt for creating data models that analyze patterns in mental health care, therapist specialties, and insurance claim trends.
+
+-- End of SQL Query
