@@ -1,0 +1,51 @@
+-- dbt Model: Trending Sales per Sales Representative
+
+-- Purpose: This script helps us understand how much each sales representative has sold over the past 12 weeks. It gives us a week-by-week view.
+
+-- Environment: Snowflake, DBT
+
+-- BEGIN Query
+
+WITH WeeklySales AS (
+    -- First, we calculate the total sales for each sales representative for each week.
+    SELECT
+        SalesRepID, -- This is the identifier for each sales representative.
+        DATE_TRUNC('week', SaleDate) AS WeekStartDate, -- This finds the start date of the week for each sale.
+        SUM(SalesAmount) AS TotalWeeklySales -- This adds up all the sales for each week.
+    FROM
+        sales_data
+    GROUP BY
+        SalesRepID, DATE_TRUNC('week', SaleDate)
+),
+
+RollingSales AS (
+    -- Next, we calculate the total sales for each representative over a 12-week period.
+    SELECT
+        ws1.SalesRepID, -- Sales representative's identifier.
+        ws1.WeekStartDate, -- Start of the week.
+        SUM(ws2.TotalWeeklySales) AS Rolling12WeekSales -- Adds up sales for the past 12 weeks.
+    FROM
+        WeeklySales ws1
+    JOIN
+        WeeklySales ws2 ON ws1.SalesRepID = ws2.SalesRepID
+        AND ws2.WeekStartDate BETWEEN DATEADD(week, -11, ws1.WeekStartDate) AND ws1.WeekStartDate
+    GROUP BY
+        ws1.SalesRepID, ws1.WeekStartDate
+)
+
+-- Finally, we select and arrange our final results to show the sales representative, the week, and their sales over the last 12 weeks.
+SELECT
+    rs.SalesRepID, -- Identifier of the sales representative.
+    rs.WeekStartDate, -- Start of the week.
+    rs.Rolling12WeekSales -- Sales total for the past 12 weeks.
+FROM
+    RollingSales rs
+ORDER BY
+    rs.SalesRepID, rs.WeekStartDate; -- This orders the results by sales representative and the week's start date.
+
+-- END QUERY
+
+-- Non-Technical Explanation:
+-- 'WeeklySales' helps us understand sales performance on a weekly basis.
+-- 'RollingSales' extends this analysis to a 12-week period, showing longer-term trends.
+-- The final step combines these insights to give a clear picture of each representative's sales trends over time.
