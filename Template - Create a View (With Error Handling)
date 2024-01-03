@@ -45,9 +45,9 @@ BEGIN CATCH
 END CATCH;
 
 -- Notes:
--- - The view 'MentalHealthCareData' consolidates data across therapists, clients, and insurance claims.
--- - INNER JOIN ensures that only matching records (therapists with clients and corresponding insurance claims) are included.
--- - This view will facilitate in-depth analysis of therapist-client interactions and insurance claim details.
--- - Can be used in dbt for creating data models that analyze patterns in mental health care, therapist specialties, and insurance claim trends.
+-- The view 'MentalHealthCareData' consolidates data across therapists, clients, and insurance claims.
+-- INNER JOIN ensures that only matching records (therapists with clients and corresponding insurance claims) are included.
+-- This view will facilitate in-depth analysis of therapist-client interactions and insurance claim details.
+-- Can be used in dbt for creating data models that analyze patterns in mental health care, therapist specialties, and insurance claim trends.
 
 -- End of SQL Query
