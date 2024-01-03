@@ -1,0 +1,72 @@
+-- Advanced SQL Query for Data Analysis from the MentalHealthCareData View
+
+-- Purpose: This script is designed to perform a comprehensive analysis of sales data, executed in a sequence of steps. Each step builds upon the previous one, showcasing advanced SQL capabilities and strategic data manipulation.
+
+-- Environment: Snowflake
+
+-- BEGIN Query
+
+-- Step 1: Aggregate Sales Data
+CREATE TEMPORARY TABLE TempSalesData AS
+SELECT
+    SaleDate,
+    Category,
+    SUM(SalesAmount) AS TotalSales
+FROM
+    SalesData
+GROUP BY
+    SaleDate, Category;
+
+-- Explanation:
+-- This step aggregates sales data by date and category, calculating the total sales for each combination.
+-- A temporary table 'TempSalesData' is created to store these aggregated results. Temporary tables in Snowflake are session-specific, which makes them good for handling intermediate datasets in any multi-step analysis.
+
+-- Step 2: Calculate Average Sales
+CREATE TEMPORARY TABLE TempAvgSales AS
+SELECT
+    SaleDate,
+    AVG(TotalSales) AS AvgSales
+FROM
+    TempSalesData
+GROUP BY
+    SaleDate
+ORDER BY
+    SaleDate;
+
+-- Explanation:
+-- This section calculates the average sales for each date using the aggregated data from the previous step.
+-- Results are stored in another temporary table 'TempAvgSales'.
+
+-- Step 3: Identify Top Categories
+CREATE TEMPORARY TABLE TempTopCategories AS
+SELECT
+    Category,
+    SUM(TotalSales) AS TotalCategorySales
+FROM
+    TempSalesData
+GROUP BY
+    Category
+ORDER BY
+    TotalCategorySales DESC
+LIMIT 10;
+
+-- Explanation:
+-- Here, we identify the top 10 performing categories based on total sales.
+
+-- Step 4: Combine Insights
+SELECT
+    a.SaleDate,
+    a.AvgSales,
+    b.Category,
+    b.TotalCategorySales
+FROM
+    TempAvgSales a
+CROSS JOIN
+    (SELECT Category, TotalCategorySales FROM TempTopCategories LIMIT 1) b
+;
+
+-- END QUERY
+
+-- Explanation:
+-- The final step combines insights from the average sales trends and the top-performing category.
+-- A CROSS JOIN is used to pair every date's average sales with the highest performing category's sales, illustrating a comprehensive view of sales performance.
