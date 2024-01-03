@@ -1,6 +1,6 @@
--- Advanced SQL Query for Data Analysis from the MentalHealthCareData View
+-- Snowflake SQL Script for Multi-Step Data Analysis
 
--- Purpose: This script is designed to perform a comprehensive analysis of sales data, executed in a sequence of steps. Each step builds upon the previous one, showcasing advanced SQL capabilities and strategic data manipulation.
+-- Purpose: This script is designed to perform a comprehensive analysis of sales data, executed in a sequence of steps.
 
 -- Environment: Snowflake
 
