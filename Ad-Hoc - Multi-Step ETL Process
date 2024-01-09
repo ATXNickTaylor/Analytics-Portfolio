@@ -1,0 +1,70 @@
+-- Ad-Hoc - Multi-Step ETL Process
+
+-- Purpose: This is a script for a multi-step ETL Process in Microsoft SQL Server.
+
+-- Environment: Microsoft SQL Server
+
+-- BEGIN Query
+
+-- Step 1: Extract our data from the source tables
+WITH SalesData AS (
+    -- Extracting sales data
+    SELECT
+        SalesID,
+        ProductID,
+        SaleDate,
+        Amount
+    FROM
+        SalesTable
+    WHERE
+        SaleDate >= '2022-01-01'
+),
+ProductData AS (
+    
+    SELECT
+        ProductID,
+        ProductName,
+        Category
+    FROM
+        ProductTable
+)
+
+-- Step 2: Transform our data using JOINs and aggregations
+
+, SalesSummary AS (
+    
+    SELECT
+        s.SaleDate,
+        p.ProductName,
+        p.Category,
+        SUM(s.Amount) AS TotalSales
+    FROM
+        SalesData s
+    JOIN
+        ProductData p ON s.ProductID = p.ProductID
+    GROUP BY
+        s.SaleDate, p.ProductName, p.Category
+)
+
+-- Step 3: Load the transformed data into a new model
+
+SELECT
+    SaleDate,
+    ProductName,
+    Category,
+    TotalSales
+INTO
+    SalesAnalysisModel -- This is the destination model
+FROM
+    SalesSummary
+ORDER BY
+    SaleDate, TotalSales DESC
+;
+
+-- END QUERY
+
+-- Notes:
+-- The script first extracts necessary data from sales and product tables.
+-- It then transforms this data by combining (joining) sales figures with product information, summing up sales amounts for each product.
+-- Finally, the transformed data is loaded into a new model, 'SalesAnalysisModel'.
+-- This reason approach is efficient for large datasets because it filters & aggregates data in stages, reducing processing load and improving query performance.
