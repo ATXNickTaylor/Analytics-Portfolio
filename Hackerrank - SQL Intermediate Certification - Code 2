@@ -1,0 +1,22 @@
+-- Author: Nicholas Taylor
+-- Purpose: Hackerrank Certification - SQL Intermediate
+-- Query Purpose: Display each country, total number of invoices, and their average amount where the average invoice amount is greater than the average invoice amount over all invoices. In this scenario from Hackerrank, the average invoice amount is 2353.5.
+-- Environment: Microsoft SQL Server
+
+SELECT 
+    co.country_name, 
+    COUNT(i.id) AS total_invoices, 
+    CAST(AVG(i.total_price) AS DECIMAL(10,6)) AS average_amount
+FROM 
+    country co
+JOIN 
+    city ci ON co.id = ci.country_id
+JOIN 
+    customer cu ON ci.id = cu.city_id
+JOIN 
+    invoice i ON cu.id = i.customer_id
+GROUP BY 
+    co.country_name
+HAVING 
+    AVG(i.total_price) > 2353.5
+;
