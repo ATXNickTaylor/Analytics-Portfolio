@@ -13,4 +13,4 @@ JOIN
   country_codes cc ON c.country = cc.country
 ORDER BY
   c.customer_id
-;
+; 
