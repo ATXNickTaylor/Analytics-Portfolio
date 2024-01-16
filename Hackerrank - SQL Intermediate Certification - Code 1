@@ -1,0 +1,26 @@
+-- Author: Nicholas Taylor
+-- Purpose: Hackerrank Certification - SQL Intermediate
+-- Query Purpose: Display the contact details, as well as the number of times contacted, between any Agent and Customer that's been in contact more than once.
+-- Environment: Microsoft SQL Server
+
+SELECT 
+    ua.id AS user_id,
+    ua.first_name,
+    ua.last_name,
+    c.id AS customer_id,
+    c.customer_name,
+    c.phone,
+    COUNT(*) AS number_of_contacts
+FROM 
+    user_account ua
+JOIN 
+    contact ct ON ua.id = ct.user_account_id
+JOIN 
+    customer c ON ct.customer_id = c.id
+WHERE 
+    ua.id = 4 AND c.id = 7
+GROUP BY 
+    ua.id, ua.first_name, ua.last_name, c.id, c.customer_name, c.phone
+HAVING 
+    COUNT(*) > 1
+;
