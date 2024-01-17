@@ -1,0 +1,16 @@
+def reverse_words_swap_case(s):
+    # Split the string into words
+    words = s.split()
+
+    # Reverse the word order
+    reversed_words = words[::-1]
+
+    # Swap the case of all letters and join back into a string
+    reversed_swapped_case = " ".join([word.swapcase() for word in reversed_words])
+
+    return reversed_swapped_case
+
+# Example usage
+input_string = 'rUns dOg'
+output_string = reverse_words_swap_case(input_string)
+print(output_string)
