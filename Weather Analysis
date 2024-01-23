@@ -1,3 +1,10 @@
+-- Advanced SQL Query for Weather Analysis
+
+-- Purpose: Displays the Month, Max Temperate, Min Temperature, and Average Temperature for the displayed month. Average Temp is rounded to the nearest integer.
+
+-- Environment: Microsoft SQL Server
+
+-- BEGIN Query
 WITH max AS (
   SELECT
     datepart(month,record_date) AS month_max,
@@ -29,3 +36,4 @@ FROM max
 JOIN min ON min.month_min = max.month_max
 JOIN avg ON avg.month_avg = max.month_max
 ;
+-- END Query
