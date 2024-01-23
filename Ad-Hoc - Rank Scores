@@ -1,0 +1,23 @@
+WITH ranked_scores AS (
+    SELECT 
+        event_id,
+        participant_name,
+        score,
+        DENSE_RANK() OVER (
+            PARTITION BY event_id 
+            ORDER BY score DESC
+        ) as ranking
+    FROM (
+        SELECT event_id, participant_name, MAX(score) as score
+        FROM scoretable
+        GROUP BY event_id, participant_name
+    ) t
+) -- Ensure there are no extra characters or commas here
+SELECT
+    event_id,
+    STRING_AGG(CASE WHEN ranking = 1 THEN participant_name END, ',') WITHIN GROUP (ORDER BY participant_name) AS first,
+    STRING_AGG(CASE WHEN ranking = 2 THEN participant_name END, ',') WITHIN GROUP (ORDER BY participant_name) AS second,
+    STRING_AGG(CASE WHEN ranking = 3 THEN participant_name END, ',') WITHIN GROUP (ORDER BY participant_name) AS third
+FROM ranked_scores
+GROUP BY event_id
+ORDER BY event_id;
