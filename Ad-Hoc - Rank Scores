@@ -6,26 +6,57 @@
 
 -- BEGIN Query
 WITH ranked_scores AS (
+    -- This 'WITH' clause starts a 'Common Table Expression (CTE)' named 'ranked_scores'. 
+    -- Think of a CTE as a temporary table that we create for this query to use.
+
     SELECT 
         event_id,
         participant_name,
         score,
+        -- Here we select columns 'event_id', 'participant_name', and 'score' 
+        -- from a subquery (explained below), and also calculate 'ranking' for each participant.
+
         DENSE_RANK() OVER (
             PARTITION BY event_id 
             ORDER BY score DESC
         ) as ranking
+        -- 'DENSE_RANK()' assigns a rank to each participant within each event, based on their score. 
+        -- 'PARTITION BY event_id' means the ranking starts over for each event. 
+        -- 'ORDER BY score DESC' means the highest score gets rank 1, the next highest rank 2, and so on.
+
     FROM (
         SELECT event_id, participant_name, MAX(score) as score
         FROM scoretable
         GROUP BY event_id, participant_name
+        -- This subquery selects the highest ('MAX') score for each participant in each event.
+        -- 'GROUP BY event_id, participant_name' groups the scores by event and participant.
     ) t
-) -- Ensure there are no extra characters or commas here
+    -- 't' is an alias for the subquery, a temporary name we give it for use in the outer query.
+)
+
+-- The above CTE 'ranked_scores' is used in the main query below:
+
 SELECT
     event_id,
+    -- For each event, we are going to aggregate (collect and summarize) participant names based on their rankings.
+
     STRING_AGG(CASE WHEN ranking = 1 THEN participant_name END, ',') WITHIN GROUP (ORDER BY participant_name) AS first,
+    -- 'STRING_AGG(...) AS first' creates a comma-separated list of names who ranked 1st in each event.
+    -- 'CASE WHEN ranking = 1 THEN participant_name END' picks only those who ranked 1st.
+
     STRING_AGG(CASE WHEN ranking = 2 THEN participant_name END, ',') WITHIN GROUP (ORDER BY participant_name) AS second,
+    -- Similar to above, but for participants who ranked 2nd.
+
     STRING_AGG(CASE WHEN ranking = 3 THEN participant_name END, ',') WITHIN GROUP (ORDER BY participant_name) AS third
+    -- And this one for participants who ranked 3rd.
+
 FROM ranked_scores
+-- This specifies that the data for this part of the query is coming from the CTE 'ranked_scores' we defined above.
+
 GROUP BY event_id
+-- Groups the results by each event.
+
 ORDER BY event_id;
+-- Orders the results by 'event_id'.
+
 -- END QUERY
