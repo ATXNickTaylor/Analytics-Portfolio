@@ -2,15 +2,22 @@
 -- Query Purpose: Selects employees from HR who received bonuses of $5,000 USD or more last quarter
 -- Environment: Microsoft SQL Server
 
+-- BEGIN QUERY
 SELECT
-  ei.employee_ID,
-  ei.name
+  ei.employee_ID,   -- This line selects the 'employee_ID' from the 'employee_information' table. It's like picking a specific column of data you are interested in.
+  ei.name           -- This line selects the 'name' from the 'employee_information' table. Again, it's choosing another specific column of data.
+
 FROM
-  employee_information ei
+  employee_information ei   -- This line tells the database to look in the 'employee_information' table for the data. 'ei' is a short nickname we give to this table to make referring to it easier later in the query.
+
 JOIN
-  last_quarter_bonus lqb ON ei.employee_ID = lqb.employee_ID
+  last_quarter_bonus lqb ON ei.employee_ID = lqb.employee_ID  -- This line connects ('JOINS') two sets of data: one from 'employee_information' and the other from 'last_quarter_bonus'. It does this by matching 'employee_ID' in both tables - think of it as lining up rows from both tables where the 'employee_ID' is the same.
+
 WHERE
-  ei.division = 'HR'
+  ei.division = 'HR'   -- This line filters the data. It says, "Only show me the data where the 'division' is 'HR' (Human Resources)." It's like applying a filter to only see certain rows.
+
   AND
-  lqb.bonus >= 5000
-; 
+  lqb.bonus >= 5000    -- This line is an additional filter. It further says, "Also, only show me the data where the 'bonus' is 5000 or more." It's adding another layer to our filter, focusing now on the bonus amount.
+;
+
+-- END QUERY
