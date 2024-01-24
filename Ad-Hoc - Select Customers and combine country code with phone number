@@ -3,14 +3,30 @@
 -- Query Purpose: Selects employees from HR who received bonuses of $5,000 USD or more last quarter
 -- Environment: Microsoft SQL Server
 
+-- BEGIN QUERY
 SELECT
   c.customer_id,
+  -- This line selects the 'customer_id' from the 'customers' table. It's like picking a specific column of data that you are interested in.
   c.name,
-  ('+' + cc.country_code + c.phone_number) AS full_phone_number
+  -- This line selects the 'name' from the 'customers' table. Again, it's choosing another specific column of data.
+
+  ('+' + cc.country_code + ' ' + c.phone_number) AS full_phone_number
+  -- This line constructs a full phone number by concatenating the country code from the 'country_codes' table with the phone number from the 'customers' table.
+  -- The '+' and ' ' are added to format the number properly (e.g., +1 1234567890).
+  -- 'AS full_phone_number' gives this concatenated string a name, making it easier to understand what it represents in the results.
+
 FROM
   customers c
+  -- This line tells the database to look in the 'customers' table for the data. 'c' is a short nickname we give to this table to make referring to it easier in other parts of the query.
+
 JOIN
   country_codes cc ON c.country = cc.country
+  -- This line connects ('JOINS') the 'customers' table to the 'country_codes' table.
+  -- It does this by matching the 'country' field in both tables, effectively lining up rows where the country matches.
+
 ORDER BY
   c.customer_id
-; 
+  -- This line orders the results by 'customer_id'. It helps in presenting the data in a neat, sequential manner based on the customer ID.
+;
+
+-- END QUERY
