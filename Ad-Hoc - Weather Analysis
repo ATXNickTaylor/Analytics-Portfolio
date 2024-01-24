@@ -6,34 +6,69 @@
 
 -- BEGIN Query
 WITH max AS (
+  -- This 'WITH' clause starts a Common Table Expression (CTE) named 'max'. 
+  -- CTEs are like temporary tables that we create for this query to use.
+
   SELECT
     datepart(month,record_date) AS month_max,
+    -- Extracts the month part from the 'record_date' and names it 'month_max'. 
+    -- It helps in grouping temperature records by month.
+
     MAX(data_value) AS max_value
+    -- Calculates the maximum ('MAX') temperature ('data_value') for each month.
+
   FROM temperature_records
+  -- Specifies that we are using data from the 'temperature_records' table.
+
   GROUP BY datepart(month,record_date)
+  -- Groups the records by month for aggregating the maximum temperatures.
 ),
+
 min AS (
+  -- Another CTE named 'min', similar to 'max', but for calculating minimum temperatures.
+
   SELECT
     datepart(month,record_date) AS month_min,
     MIN(data_value) AS min_value
+  -- Calculates the minimum ('MIN') temperature for each month.
+
   FROM temperature_records
   GROUP BY datepart(month,record_date)
 ),
+
 avg AS (
+  -- A CTE named 'avg' for calculating average temperatures.
+
   SELECT
     datepart(month,record_date) AS month_avg,
     CAST(ROUND(AVG(CAST(data_value AS FLOAT)), 0) AS INT) AS avg_value
+    -- Calculates the average ('AVG') temperature, converts it to a FLOAT for precise averaging, 
+    -- rounds it to the nearest whole number, and then casts it as an INT to remove decimals.
+
   FROM temperature_records
   WHERE data_type LIKE 'avg'
+  -- Filters records to include only those where 'data_type' indicates an average value.
+
   GROUP BY datepart(month,record_date), data_type
 )
+
+-- The main query begins here, using the above-defined CTEs:
+
 SELECT
   month_max,
   max_value,
   min_value,
   avg_value
+  -- Selects the month and the calculated max, min, and avg temperatures.
+
 FROM max
+-- Specifies that we are using data from the 'max' CTE.
+
 JOIN min ON min.month_min = max.month_max
+-- Joins the 'min' CTE with 'max' CTE on the month, ensuring data is matched by the same month.
+
 JOIN avg ON avg.month_avg = max.month_max
+-- Similarly, joins the 'avg' CTE with 'max', again matching by month.
 ;
+
 -- END Query
